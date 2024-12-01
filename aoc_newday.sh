@@ -28,16 +28,16 @@ cat - > $SrcFile << EOF
 package main
 
 import (
-//	"rindlow.se/aoc2023/utils"
+//	"github.com/rindlow/aoc-utils"
 )
 
 func part1(filename string) string {
 	return "Not implemented"
 }
 
-func part2(filename string) string {
-	return "Not implemented"
-}
+// func part2(filename string) string {
+// 	return "Not implemented"
+// }
 EOF
 
 cat - > $TestFile << EOF
