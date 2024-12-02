@@ -1,4 +1,4 @@
-package main
+package day2
 
 import (
 	"strconv"
@@ -57,10 +57,10 @@ func safeLevels(filename string, checkFn func([]int) bool) (count int) {
 	return
 }
 
-func part1(filename string) string {
+func Part1(filename string) string {
 	return strconv.Itoa(safeLevels(filename, isSafe))
 }
 
-func part2(filename string) string {
+func Part2(filename string) string {
 	return strconv.Itoa(safeLevels(filename, isSafeWithDampener))
 }

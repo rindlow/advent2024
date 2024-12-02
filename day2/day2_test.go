@@ -1,4 +1,4 @@
-package main
+package day2
 
 import (
 	"testing"
@@ -13,7 +13,7 @@ func TestPart1(t *testing.T) {
 		{filename: "../input/day2.txt", expected: "279"},
 	}
 	for _, tc := range testCases {
-		value := part1(tc.filename)
+		value := Part1(tc.filename)
 		if value != tc.expected {
 			t.Fatalf("part1: got %s, want %s", value, tc.expected)
 		}
@@ -29,7 +29,7 @@ func TestPart2(t *testing.T) {
 		{filename: "../input/day2.txt", expected: "343"},
 	}
 	for _, tc := range testCases {
-		value := part2(tc.filename)
+		value := Part2(tc.filename)
 		if value != tc.expected {
 			t.Fatalf("part2: got %s, want %s", value, tc.expected)
 		}

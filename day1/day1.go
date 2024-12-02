@@ -1,4 +1,4 @@
-package main
+package day1
 
 import (
 	"slices"
@@ -41,10 +41,10 @@ func similarityScore(filename string) (sum int) {
 	return
 }
 
-func part1(filename string) string {
+func Part1(filename string) string {
 	return strconv.Itoa(sumDiffs(filename))
 }
 
-func part2(filename string) string {
+func Part2(filename string) string {
 	return strconv.Itoa(similarityScore(filename))
 }
