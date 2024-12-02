@@ -7,13 +7,6 @@ import (
 	"github.com/rindlow/aoc-utils"
 )
 
-func abs(x, y int) int {
-	if x < y {
-		return y - x
-	}
-	return x - y
-}
-
 func readLists(filename string) (lists [2][]int) {
 	lines := utils.ReadLines(filename)
 	for _, line := range lines {
@@ -31,7 +24,7 @@ func sumDiffs(filename string) (sum int) {
 		slices.Sort(list)
 	}
 	for i, a := range lists[0] {
-		sum += abs(a, lists[1][i])
+		sum += utils.Abs(a - lists[1][i])
 	}
 	return
 }
