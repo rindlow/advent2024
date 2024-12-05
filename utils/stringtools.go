@@ -22,8 +22,8 @@ func ReadLines(filename string) (lines []string) {
 	return
 }
 
-func StringToNumbers(s string) (numbers []int) {
-	for _, num := range strings.Split(s, " ") {
+func StringToNumbersWithDelimiter(s string, delimiter string) (numbers []int) {
+	for _, num := range strings.Split(s, delimiter) {
 		if num == "" {
 			continue
 		}
@@ -34,4 +34,8 @@ func StringToNumbers(s string) (numbers []int) {
 		numbers = append(numbers, n)
 	}
 	return
+}
+
+func StringToNumbers(s string) (numbers []int) {
+	return StringToNumbersWithDelimiter(s, " ")
 }
