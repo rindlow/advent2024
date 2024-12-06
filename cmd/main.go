@@ -13,6 +13,7 @@ import (
     "rindlow.se/advent2024/day3"
     "rindlow.se/advent2024/day4"
     "rindlow.se/advent2024/day5"
+    "rindlow.se/advent2024/day6"
 	// Insert more modules above this line
 )
 
@@ -43,6 +44,7 @@ func main() {
 		3: {day3.Part1, day3.Part2},
 		4: {day4.Part1, day4.Part2},
 		5: {day5.Part1, day5.Part2},
+		6: {day6.Part1, day6.Part2},
 		// Insert more days above this line
 	}
 	dayNos := make([]int, len(days))
