@@ -2,87 +2,103 @@ package day6
 
 import (
 	"maps"
-	"slices"
 	"strconv"
 
 	"github.com/rindlow/aoc-utils"
 )
 
-type Pos struct {
+type Coord struct {
 	X, Y int
 }
 
-func (pos Pos) add(dir Pos) Pos {
-	return Pos{pos.X + dir.X, pos.Y + dir.Y}
+type State struct {
+	Pos    Coord
+	Dx, Dy int
 }
 
-func turn(dir Pos) Pos {
+func (s State) next() State {
+	return State{Coord{s.Pos.X + s.Dx, s.Pos.Y + s.Dy}, s.Dx, s.Dy}
+}
+
+func (s State) turn() State {
 	switch {
-	case dir.X == 0 && dir.Y == -1:
-		return Pos{1, 0}
-	case dir.X == 1 && dir.Y == 0:
-		return Pos{0, 1}
-	case dir.X == 0 && dir.Y == 1:
-		return Pos{-1, 0}
+	case s.Dx == 0 && s.Dy == -1:
+		return State{s.Pos, 1, 0}
+	case s.Dx == 1 && s.Dy == 0:
+		return State{s.Pos, 0, 1}
+	case s.Dx == 0 && s.Dy == 1:
+		return State{s.Pos, -1, 0}
 	default:
-		return Pos{0, -1}
+		return State{s.Pos, 0, -1}
 	}
 }
 
-func readMap(filename string) (start Pos, max Pos, obstacles map[Pos]bool) {
-	obstacles = make(map[Pos]bool)
+func readMap(filename string) (start State, max Coord, obstacles map[Coord]bool) {
+	obstacles = make(map[Coord]bool)
 	guardMap := utils.ReadLines(filename)
-	max = Pos{len(guardMap[0]) - 1, len(guardMap) - 1}
+	max = Coord{len(guardMap[0]) - 1, len(guardMap) - 1}
 	for row, line := range guardMap {
 		for col, char := range line {
+			pos := Coord{col, row}
 			switch char {
 			case '^':
-				start = Pos{col, row}
+				start = State{pos, 0, -1}
 			case '#':
-				obstacles[Pos{col, row}] = true
+				obstacles[pos] = true
 			}
 		}
 	}
 	return
 }
 
-func walk(pos Pos, dir Pos, max Pos, obstacles map[Pos]bool) ([]Pos, bool) {
-	visited := make(map[Pos][]Pos)
+func walk(state State, max Coord, obstacles map[Coord]bool) ([]State, bool) {
+	states := []State{}
+	visited := make(map[State]bool)
 	for {
-		if pos.X < 0 || pos.X > max.X || pos.Y < 0 || pos.Y > max.Y {
+		if state.Pos.X < 0 || state.Pos.X > max.X || state.Pos.Y < 0 || state.Pos.Y > max.Y {
 			break
 		}
-		if slices.Contains(visited[pos], dir) {
-			return []Pos{}, true
+		if visited[state] {
+			return []State{}, true
 		}
-		visited[pos] = append(visited[pos], dir)
-		for obstacles[pos.add(dir)] {
-			dir = turn(dir)
+		states = append(states, state)
+		visited[state] = true
+		for obstacles[state.next().Pos] {
+			state = state.turn()
 		}
-		pos = pos.add(dir)
+		state = state.next()
 	}
-	return slices.Collect(maps.Keys(visited)), false
+	return states, false
 }
 
 func visitedPositions(filename string) int {
 	start, max, obstacles := readMap(filename)
-	visited, _ := walk(start, Pos{0, -1}, max, obstacles)
+	states, _ := walk(start, max, obstacles)
+	visited := make(map[Coord]bool)
+	for _, state := range states {
+		visited[state.Pos] = true
+	}
 	return len(visited)
 }
 
-func numberOfLoops(filename string) (count int) {
+func numberOfLoops(filename string) int {
 	start, max, obstacles := readMap(filename)
-	dir := Pos{0, -1}
-	visited, _ := walk(start, dir, max, obstacles)
-	for _, pos := range visited {
-		newObstacles := maps.Clone(obstacles)
-		newObstacles[pos] = true
-		_, loop := walk(start, dir, max, newObstacles)
-		if loop {
-			count += 1
+	states, _ := walk(start, max, obstacles)
+	loops := make(map[Coord]bool)
+	checked := make(map[Coord]bool)
+	for step, state := range states {
+		if step == 0 || checked[state.Pos] {
+			continue
 		}
+		newObstacles := maps.Clone(obstacles)
+		newObstacles[state.Pos] = true
+		_, loop := walk(states[step-1], max, newObstacles)
+		if loop {
+			loops[state.Pos] = true
+		}
+		checked[state.Pos] = true
 	}
-	return
+	return len(loops)
 }
 
 func Part1(filename string) string {
