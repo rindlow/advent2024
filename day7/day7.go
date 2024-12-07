@@ -1,72 +1,78 @@
 package day7
 
 import (
-	"math/big"
+	"log"
+	"strconv"
 	"strings"
 
 	"github.com/rindlow/aoc-utils"
 )
 
-type Checker func(*big.Int, *big.Int, []*big.Int) bool
+type Checker func(int64, int64, []int64) bool
 
-func existsAnswerSumMul(answer *big.Int, first *big.Int, rest []*big.Int) bool {
+func existsAnswerSumMul(answer int64, first int64, rest []int64) bool {
 	if len(rest) == 0 {
-		return answer.Cmp(first) == 0
+		return answer == first
+	}
+	operand := rest[0]
+	rest = rest[1:]
+	sum := first + operand
+	if sum <= answer && existsAnswerSumMul(answer, sum, rest) {
+		return true
+	}
+	prod := first * operand
+	return prod <= answer && existsAnswerSumMul(answer, prod, rest)
+}
+
+func existsAnswerSumMulConc(answer int64, first int64, rest []int64) bool {
+	if len(rest) == 0 {
+		return answer == first
 	}
 	operand := rest[0]
 	rest = rest[1:]
 
-	sum := new(big.Int).Add(first, operand)
-	if sum.Cmp(answer) <= 0 && existsAnswerSumMul(answer, sum, rest) {
+	sum := first + operand
+	if sum <= answer && existsAnswerSumMulConc(answer, sum, rest) {
 		return true
 	}
-	prod := new(big.Int).Mul(first, operand)
-	return prod.Cmp(answer) <= 0 && existsAnswerSumMul(answer, prod, rest)
+	prod := first * operand
+	if prod <= answer && existsAnswerSumMulConc(answer, prod, rest) {
+		return true
+	}
+	concat := strconv.FormatInt(first, 10) + strconv.FormatInt(operand, 10)
+	conc, err := strconv.ParseInt(concat, 10, 64)
+	if err != nil {
+		log.Fatalf("ParseInt(%s): %q", concat, err)
+	}
+	return conc <= answer && existsAnswerSumMulConc(answer, conc, rest)
 }
 
-func existsAnswerSumMulConc(answer *big.Int, first *big.Int, rest []*big.Int) bool {
-	if len(rest) == 0 {
-		return answer.Cmp(first) == 0
-	}
-	operand := rest[0]
-	rest = rest[1:]
-
-	sum := new(big.Int).Add(first, operand)
-	if sum.Cmp(answer) <= 0 && existsAnswerSumMulConc(answer, sum, rest) {
-		return true
-	}
-	prod := new(big.Int).Mul(first, operand)
-	if prod.Cmp(answer) <= 0 && existsAnswerSumMulConc(answer, prod, rest) {
-		return true
-	}
-	conc := new(big.Int)
-	conc.SetString(first.String()+operand.String(), 10)
-	return conc.Cmp(answer) <= 0 && existsAnswerSumMulConc(answer, conc, rest)
-}
-
-func sumCalibration(filename string, checker Checker) (sum *big.Int) {
-	sum = big.NewInt(0)
+func sumCalibration(filename string, checker Checker) (sum int64) {
 	for _, line := range utils.ReadLines(filename) {
 		colon := strings.Split(line, ": ")
-		answer := new(big.Int)
-		answer.SetString(colon[0], 10)
-		operands := []*big.Int{}
+		answer, err := strconv.ParseInt(colon[0], 10, 64)
+		if err != nil {
+			log.Fatalf("ParseInt(%s): %q", colon[0], err)
+		}
+		operands := []int64{}
 		for _, digits := range strings.Split(colon[1], " ") {
-			num := new(big.Int)
-			num.SetString(digits, 10)
+			num, err := strconv.ParseInt(digits, 10, 64)
+			if err != nil {
+				log.Fatalf("ParseInt(%s): %q", digits, err)
+			}
 			operands = append(operands, num)
 		}
 		if checker(answer, operands[0], operands[1:]) {
-			sum.Add(sum, answer)
+			sum += answer
 		}
 	}
 	return
 }
 
 func Part1(filename string) string {
-	return sumCalibration(filename, existsAnswerSumMul).String()
+	return strconv.FormatInt(sumCalibration(filename, existsAnswerSumMul), 10)
 }
 
 func Part2(filename string) string {
-	return sumCalibration(filename, existsAnswerSumMulConc).String()
+	return strconv.FormatInt(sumCalibration(filename, existsAnswerSumMulConc), 10)
 }
