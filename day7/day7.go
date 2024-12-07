@@ -7,53 +7,44 @@ import (
 	"github.com/rindlow/aoc-utils"
 )
 
-type Combiner func([]*big.Int) []*big.Int
+type Checker func(*big.Int, *big.Int, []*big.Int) bool
 
-func addOrMul(operands []*big.Int) []*big.Int {
-	if len(operands) == 1 {
-		return operands
+func existsAnswerSumMul(answer *big.Int, first *big.Int, rest []*big.Int) bool {
+	if len(rest) == 0 {
+		return answer.Cmp(first) == 0
 	}
-	sum := new(big.Int)
-	sum.Add(operands[0], operands[1])
-	prod := new(big.Int)
-	prod.Mul(operands[0], operands[1])
-	if len(operands) == 2 {
-		return []*big.Int{sum, prod}
+	operand := rest[0]
+	rest = rest[1:]
+
+	sum := new(big.Int).Add(first, operand)
+	if sum.Cmp(answer) <= 0 && existsAnswerSumMul(answer, sum, rest) {
+		return true
 	}
-	summed := addOrMul(append([]*big.Int{sum}, operands[2:]...))
-	prodded := addOrMul(append([]*big.Int{prod}, operands[2:]...))
-	return append(summed, prodded...)
+	prod := new(big.Int).Mul(first, operand)
+	return prod.Cmp(answer) <= 0 && existsAnswerSumMul(answer, prod, rest)
 }
 
-func addMulOrConcat(operands []*big.Int) []*big.Int {
-	if len(operands) == 1 {
-		return operands
+func existsAnswerSumMulConc(answer *big.Int, first *big.Int, rest []*big.Int) bool {
+	if len(rest) == 0 {
+		return answer.Cmp(first) == 0
 	}
-	sum := new(big.Int)
-	sum.Add(operands[0], operands[1])
-	prod := new(big.Int)
-	prod.Mul(operands[0], operands[1])
+	operand := rest[0]
+	rest = rest[1:]
+
+	sum := new(big.Int).Add(first, operand)
+	if sum.Cmp(answer) <= 0 && existsAnswerSumMulConc(answer, sum, rest) {
+		return true
+	}
+	prod := new(big.Int).Mul(first, operand)
+	if prod.Cmp(answer) <= 0 && existsAnswerSumMulConc(answer, prod, rest) {
+		return true
+	}
 	conc := new(big.Int)
-	conc.SetString(operands[0].String()+operands[1].String(), 10)
-	if len(operands) == 2 {
-		return []*big.Int{sum, prod, conc}
-	}
-	summed := addMulOrConcat(append([]*big.Int{sum}, operands[2:]...))
-	prodded := addMulOrConcat(append([]*big.Int{prod}, operands[2:]...))
-	conced := addMulOrConcat(append([]*big.Int{conc}, operands[2:]...))
-	return append(append(summed, prodded...), conced...)
+	conc.SetString(first.String()+operand.String(), 10)
+	return conc.Cmp(answer) <= 0 && existsAnswerSumMulConc(answer, conc, rest)
 }
 
-func testCalibration(answer *big.Int, operands []*big.Int, combiner Combiner) bool {
-	for _, calc := range combiner(operands) {
-		if answer.Cmp(calc) == 0 {
-			return true
-		}
-	}
-	return false
-}
-
-func sumCalibration(filename string, combiner Combiner) (sum *big.Int) {
+func sumCalibration(filename string, checker Checker) (sum *big.Int) {
 	sum = big.NewInt(0)
 	for _, line := range utils.ReadLines(filename) {
 		colon := strings.Split(line, ": ")
@@ -65,7 +56,7 @@ func sumCalibration(filename string, combiner Combiner) (sum *big.Int) {
 			num.SetString(digits, 10)
 			operands = append(operands, num)
 		}
-		if testCalibration(answer, operands, combiner) {
+		if checker(answer, operands[0], operands[1:]) {
 			sum.Add(sum, answer)
 		}
 	}
@@ -73,9 +64,9 @@ func sumCalibration(filename string, combiner Combiner) (sum *big.Int) {
 }
 
 func Part1(filename string) string {
-	return sumCalibration(filename, addOrMul).String()
+	return sumCalibration(filename, existsAnswerSumMul).String()
 }
 
 func Part2(filename string) string {
-	return sumCalibration(filename, addMulOrConcat).String()
+	return sumCalibration(filename, existsAnswerSumMulConc).String()
 }
