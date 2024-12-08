@@ -17,3 +17,10 @@ func Sign(x int) int {
 		return 0
 	}
 }
+
+func Max(x, y int) int {
+	if x > y {
+		return x
+	}
+	return y
+}
