@@ -36,3 +36,20 @@ func TestSign(t *testing.T) {
 		}
 	}
 }
+
+func TestMax(t *testing.T) {
+	testCases := []struct {
+		x, y     int
+		expected int
+	}{
+		{x: 17, y: 18, expected: 18},
+		{x: -17, y: -18, expected: -17},
+		{x: 0, y: 0, expected: 0},
+	}
+	for _, tc := range testCases {
+		value := Max(tc.x, tc.y)
+		if value != tc.expected {
+			t.Fatalf("Max: got %d, want %d", value, tc.expected)
+		}
+	}
+}
