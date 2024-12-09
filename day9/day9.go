@@ -29,27 +29,27 @@ func checksum(filename string) (sum int) {
 			}
 		}
 	}
-	free := 0
-	file := len(disk) - 1
-	for disk[free] >= 0 {
-		free += 1
+	freePtr := 0
+	for disk[freePtr] >= 0 {
+		freePtr += 1
 	}
-	for disk[file] < 0 {
-		file -= 1
+	filePtr := len(disk) - 1
+	for disk[filePtr] < 0 {
+		filePtr -= 1
 	}
-	for free < file {
-		disk[free] = disk[file]
-		disk[file] = -1
-		for disk[free] >= 0 {
-			free += 1
+	for freePtr < filePtr {
+		disk[freePtr] = disk[filePtr]
+		disk[filePtr] = -1
+		for disk[freePtr] >= 0 {
+			freePtr += 1
 		}
-		for disk[file] < 0 {
-			file -= 1
+		for disk[filePtr] < 0 {
+			filePtr -= 1
 		}
 	}
-	for i := 0; i < len(disk)-1; i++ {
-		if disk[i] >= 0 {
-			sum += i * disk[i]
+	for pos := 0; pos < len(disk)-1; pos++ {
+		if disk[pos] >= 0 {
+			sum += pos * disk[pos]
 		}
 	}
 	return
@@ -57,56 +57,55 @@ func checksum(filename string) (sum int) {
 
 func checksumFile(filename string) (sum int) {
 	disk := []Item{}
-	fileid := 0
+	fileId := 0
 	for _, line := range utils.ReadLines(filename) {
 		for pos, char := range line {
 			length := int(char - '0')
 			if pos%2 == 0 {
 				disk = append(disk, Item{false, length, pos / 2})
-				fileid = pos / 2
+				fileId = pos / 2
 			} else {
 				disk = append(disk, Item{true, length, -1})
 			}
 		}
 	}
-	file := len(disk) - 1
-	for disk[file].Free {
-		file -= 1
+	filePtr := len(disk) - 1
+	for disk[filePtr].Free {
+		filePtr -= 1
 	}
 	for {
-		for i := 0; i < file; i++ {
-			if disk[i].Free && disk[i].Length >= disk[file].Length {
-				rest := disk[i].Length - disk[file].Length
+		for i := 0; i < filePtr; i++ {
+			if disk[i].Free && disk[i].Length >= disk[filePtr].Length {
+				rest := disk[i].Length - disk[filePtr].Length
 				disk[i].Free = false
-				disk[i].Length = disk[file].Length
-				disk[i].FileID = disk[file].FileID
-				disk[file].Free = true
-				disk[file].FileID = -1
+				disk[i].Length = disk[filePtr].Length
+				disk[i].FileID = disk[filePtr].FileID
+				disk[filePtr].Free = true
+				disk[filePtr].FileID = -1
 				if rest > 0 {
 					disk = slices.Insert(disk, i+1, Item{true, rest, -1})
 				}
 				break
 			}
 		}
-		fileid -= 1
-		file -= 1
-		for disk[file].FileID != fileid {
-			file -= 1
+
+		fileId -= 1
+		filePtr -= 1
+		for disk[filePtr].FileID != fileId {
+			filePtr -= 1
 		}
-		if disk[file].FileID == 0 {
+		if disk[filePtr].FileID == 0 {
 			break
 		}
 	}
-	index := 0
+	pos := 0
 	for i := 0; i < len(disk)-1; i++ {
 		if disk[i].Free {
-			for j := 0; j < disk[i].Length; j++ {
-			}
-			index += disk[i].Length
+			pos += disk[i].Length
 		} else {
 			for j := 0; j < disk[i].Length; j++ {
-				sum += index * disk[i].FileID
-				index += 1
+				sum += pos * disk[i].FileID
+				pos += 1
 			}
 		}
 	}
