@@ -8,9 +8,9 @@ import (
 	"github.com/rindlow/aoc-utils"
 )
 
-type Checker func(int64, int64, []int64) bool
+type Checker func(int, int, []int) bool
 
-func existsAnswerSumMul(answer int64, first int64, rest []int64) bool {
+func existsAnswerSumMul(answer int, first int, rest []int) bool {
 	if len(rest) == 0 {
 		return answer == first
 	}
@@ -24,7 +24,7 @@ func existsAnswerSumMul(answer int64, first int64, rest []int64) bool {
 	return prod <= answer && existsAnswerSumMul(answer, prod, rest)
 }
 
-func existsAnswerSumMulConc(answer int64, first int64, rest []int64) bool {
+func existsAnswerSumMulConc(answer int, first int, rest []int) bool {
 	if len(rest) == 0 {
 		return answer == first
 	}
@@ -39,26 +39,26 @@ func existsAnswerSumMulConc(answer int64, first int64, rest []int64) bool {
 	if prod <= answer && existsAnswerSumMulConc(answer, prod, rest) {
 		return true
 	}
-	concat := strconv.FormatInt(first, 10) + strconv.FormatInt(operand, 10)
-	conc, err := strconv.ParseInt(concat, 10, 64)
+	concat := strconv.Itoa(first) + strconv.Itoa(operand)
+	conc, err := strconv.Atoi(concat)
 	if err != nil {
 		log.Fatalf("ParseInt(%s): %q", concat, err)
 	}
 	return conc <= answer && existsAnswerSumMulConc(answer, conc, rest)
 }
 
-func sumCalibration(filename string, checker Checker) (sum int64) {
+func sumCalibration(filename string, checker Checker) (sum int) {
 	for _, line := range utils.ReadLines(filename) {
 		colon := strings.Split(line, ": ")
-		answer, err := strconv.ParseInt(colon[0], 10, 64)
+		answer, err := strconv.Atoi(colon[0])
 		if err != nil {
-			log.Fatalf("ParseInt(%s): %q", colon[0], err)
+			log.Fatalf("Atoi(%s): %q", colon[0], err)
 		}
-		operands := []int64{}
+		operands := []int{}
 		for _, digits := range strings.Split(colon[1], " ") {
-			num, err := strconv.ParseInt(digits, 10, 64)
+			num, err := strconv.Atoi(digits)
 			if err != nil {
-				log.Fatalf("ParseInt(%s): %q", digits, err)
+				log.Fatalf("Atoi(%s): %q", digits, err)
 			}
 			operands = append(operands, num)
 		}
@@ -70,9 +70,9 @@ func sumCalibration(filename string, checker Checker) (sum int64) {
 }
 
 func Part1(filename string) string {
-	return strconv.FormatInt(sumCalibration(filename, existsAnswerSumMul), 10)
+	return strconv.Itoa(sumCalibration(filename, existsAnswerSumMul))
 }
 
 func Part2(filename string) string {
-	return strconv.FormatInt(sumCalibration(filename, existsAnswerSumMulConc), 10)
+	return strconv.Itoa(sumCalibration(filename, existsAnswerSumMulConc))
 }
