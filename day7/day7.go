@@ -2,49 +2,47 @@ package day7
 
 import (
 	"log"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/rindlow/aoc-utils"
 )
 
-type Checker func(int, int, []int) bool
+type Checker func(int, []int) bool
 
-func existsAnswerSumMul(answer int, first int, rest []int) bool {
-	if len(rest) == 0 {
-		return answer == first
+func existsAnswerSumMul(answer int, operands []int) bool {
+	if len(operands) == 1 {
+		return answer == operands[0]
 	}
-	operand := rest[0]
-	rest = rest[1:]
-	sum := first + operand
-	if sum <= answer && existsAnswerSumMul(answer, sum, rest) {
+	first := operands[0]
+	if answer%first == 0 && existsAnswerSumMul(answer/first, operands[1:]) {
 		return true
 	}
-	prod := first * operand
-	return prod <= answer && existsAnswerSumMul(answer, prod, rest)
+	return answer > first && existsAnswerSumMul(answer-first, operands[1:])
 }
 
-func existsAnswerSumMulConc(answer int, first int, rest []int) bool {
-	if len(rest) == 0 {
-		return answer == first
+func existsAnswerSumMulConc(answer int, operands []int) bool {
+	if len(operands) == 1 {
+		return answer == operands[0]
 	}
-	operand := rest[0]
-	rest = rest[1:]
-
-	sum := first + operand
-	if sum <= answer && existsAnswerSumMulConc(answer, sum, rest) {
+	first := operands[0]
+	if answer%first == 0 && existsAnswerSumMulConc(answer/first, operands[1:]) {
 		return true
 	}
-	prod := first * operand
-	if prod <= answer && existsAnswerSumMulConc(answer, prod, rest) {
-		return true
+	strAnswer := strconv.Itoa(answer)
+	strFirst := strconv.Itoa(first)
+	if answer != first && strings.HasSuffix(strAnswer, strFirst) {
+		prefixLen := len(strAnswer) - len(strFirst)
+		nextAnswer, err := strconv.Atoi(strAnswer[:prefixLen])
+		if err != nil {
+			log.Fatalf("Atoi %s: %q", strAnswer[:prefixLen], err)
+		}
+		if existsAnswerSumMulConc(nextAnswer, operands[1:]) {
+			return true
+		}
 	}
-	concat := strconv.Itoa(first) + strconv.Itoa(operand)
-	conc, err := strconv.Atoi(concat)
-	if err != nil {
-		log.Fatalf("ParseInt(%s): %q", concat, err)
-	}
-	return conc <= answer && existsAnswerSumMulConc(answer, conc, rest)
+	return answer > first && existsAnswerSumMulConc(answer-first, operands[1:])
 }
 
 func sumCalibration(filename string, checker Checker) (sum int) {
@@ -62,7 +60,8 @@ func sumCalibration(filename string, checker Checker) (sum int) {
 			}
 			operands = append(operands, num)
 		}
-		if checker(answer, operands[0], operands[1:]) {
+		slices.Reverse(operands)
+		if checker(answer, operands) {
 			sum += answer
 		}
 	}
