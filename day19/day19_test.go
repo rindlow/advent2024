@@ -26,7 +26,7 @@ func TestPart2(t *testing.T) {
 		expected string
 	}{
 		{filename: "input.txt", expected: "16"},
-		{filename: "../input/day19.txt", expected: "Answer"},
+		{filename: "../input/day19.txt", expected: "624802218898092"},
 	}
 	for _, tc := range testCases {
 		value := Part2(tc.filename)
