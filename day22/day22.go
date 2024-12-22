@@ -23,10 +23,6 @@ func sum2000(filename string) (sum int) {
 	return
 }
 
-func posMod(i, m int) int {
-	return ((i % m) + m) % m
-}
-
 func maxBananas(filename string) (max int) {
 	sequences := make(map[[4]int]int)
 	for _, num := range utils.ReadLinesAsInt(filename) {
@@ -37,12 +33,13 @@ func maxBananas(filename string) (max int) {
 			num = nextRandom(num)
 			price := num % 10
 			if i > 0 {
-				diffs[posMod(i, 4)] = price - last
+				diffs[i%4] = price - last
 			}
 			last = price
 			if i >= 4 {
-				sequence := [4]int{diffs[posMod(i-3, 4)], diffs[posMod(i-2, 4)],
-					diffs[posMod(i-1, 4)], diffs[posMod(i, 4)]}
+				sequence := [4]int{
+					diffs[(i-3)%4], diffs[(i-2)%4],
+					diffs[(i-1)%4], diffs[i%4]}
 				if !seen[sequence] {
 					sequences[sequence] += price
 				}
