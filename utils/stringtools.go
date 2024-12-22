@@ -22,6 +22,25 @@ func ReadLines(filename string) (lines []string) {
 	return
 }
 
+func ReadLinesAsInt(filename string) (lines []int) {
+	fileHandle, err := os.Open(filename)
+	if err != nil {
+		log.Fatalf("Failed to open %s: %q", filename, err)
+	}
+	defer fileHandle.Close()
+
+	scanner := bufio.NewScanner(fileHandle)
+	for scanner.Scan() {
+		line := scanner.Text()
+		num, err := strconv.Atoi(line)
+		if err != nil {
+			log.Fatalf("Atoi %s: %q", line, err)
+		}
+		lines = append(lines, num)
+	}
+	return
+}
+
 func StringToNumbersWithDelimiter(s string, delimiter string) (numbers []int) {
 	for _, num := range strings.Split(s, delimiter) {
 		if num == "" {
