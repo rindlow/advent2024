@@ -32,18 +32,16 @@ func maxBananas(filename string) (max int) {
 		for i := 0; i < 2000; i++ {
 			num = nextRandom(num)
 			price := num % 10
-			if i > 0 {
-				diffs[i%4] = price - last
-			}
+			diffs[i%4] = price - last
 			last = price
-			if i >= 4 {
+			if i >= 3 {
 				sequence := [4]int{
 					diffs[(i-3)%4], diffs[(i-2)%4],
 					diffs[(i-1)%4], diffs[i%4]}
 				if !seen[sequence] {
 					sequences[sequence] += price
+					seen[sequence] = true
 				}
-				seen[sequence] = true
 			}
 		}
 	}
